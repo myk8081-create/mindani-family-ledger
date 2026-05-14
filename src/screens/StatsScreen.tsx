@@ -132,8 +132,8 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
   const topCategoryPercent = stats.topCategory ? percentText(stats.topCategory.value, stats.expense) : '0%';
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
+    <div className="space-y-5 xl:grid xl:grid-cols-12 xl:items-start xl:gap-5 xl:space-y-0">
+      <section className="rounded-lg bg-navy p-5 text-white shadow-soft xl:col-span-12">
         <p className="text-sm font-bold text-blue-100">{monthLabel(currentMonth)} 분석</p>
         <div className="mt-3 flex items-start justify-between gap-4">
           <div>
@@ -147,7 +147,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         </div>
       </section>
 
-      <section className="grid gap-3">
+      <section className="grid gap-3 xl:col-span-4">
         <div className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
           <div className="flex items-start gap-3">
             <div className={`rounded-lg p-2 ${trendIsUp ? 'bg-warm/10 text-warm' : 'bg-mint/10 text-teal-700'}`}>
@@ -195,7 +195,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft xl:col-span-8">
         <h2 className="text-lg font-black text-ink">최근 6개월 흐름</h2>
         <div className="mt-4 h-60">
           <ResponsiveContainer width="100%" height="100%">
@@ -224,7 +224,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft xl:col-span-5">
         <h2 className="text-lg font-black text-ink">카테고리 랭킹</h2>
         {stats.categoryRows.length > 0 ? (
           <div className="mt-4 space-y-3">
@@ -260,7 +260,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         )}
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft xl:col-span-7">
         <h2 className="text-lg font-black text-ink">지출 태그 분석</h2>
         {stats.tagRows.length > 0 ? (
           <div className="mt-4 h-52">
@@ -285,7 +285,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         )}
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft xl:col-span-5">
         <h2 className="text-lg font-black text-ink">결제수단 비율</h2>
         {stats.paymentRows.length > 0 ? (
           <div className="mt-4 h-56">
@@ -315,7 +315,7 @@ export function StatsScreen({ categories, paymentMethods, transactions }: StatsS
         )}
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft xl:col-span-7">
         <h2 className="text-lg font-black text-ink">월별 수입/지출 비교</h2>
         <div className="mt-4 h-60">
           <ResponsiveContainer width="100%" height="100%">

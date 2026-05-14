@@ -29,7 +29,7 @@ export function EntryScreen({ authorName, categories, paymentMethods, onSave }: 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:max-w-3xl">
       <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
         <h2 className="mb-4 text-lg font-black text-ink">빠른 입력</h2>
         <TransactionForm

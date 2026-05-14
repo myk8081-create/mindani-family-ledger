@@ -65,12 +65,12 @@ export default function App() {
   const activeTab = screen === 'recurring' ? 'settings' : screen;
 
   return (
-    <main className="min-h-dvh bg-[#f8fbff] text-ink">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#f8fbff]/90 px-5 pb-3 pt-[calc(env(safe-area-inset-top)+14px)] backdrop-blur">
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
+    <main className="min-h-dvh bg-[#f8fbff] text-ink lg:pl-72">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#f8fbff]/90 px-5 pb-3 pt-[calc(env(safe-area-inset-top)+14px)] backdrop-blur lg:px-8 lg:pb-4 lg:pt-6">
+        <div className="mx-auto flex max-w-xl items-center justify-between gap-3 lg:max-w-[1180px]">
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-500">{APP_DISPLAY_NAME}</p>
-            <h1 className="truncate text-2xl font-black tracking-normal text-ink">{titles[screen]}</h1>
+            <p className="truncate text-sm font-bold text-slate-500 lg:hidden">{APP_DISPLAY_NAME}</p>
+            <h1 className="truncate text-2xl font-black tracking-normal text-ink lg:text-3xl">{titles[screen]}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <SyncBadge status={ledger.syncStatus} queueCount={ledger.queueCount} />
@@ -87,7 +87,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-xl px-5 pb-28 pt-5">
+      <div className="mx-auto max-w-xl px-5 pb-28 pt-5 lg:max-w-[1180px] lg:px-8 lg:pb-10 lg:pt-8">
         {ledger.error ? <p className="mb-4 rounded-lg bg-warm/10 px-4 py-3 text-sm font-bold text-warm">{ledger.error}</p> : null}
 
         {screen === 'home' ? (

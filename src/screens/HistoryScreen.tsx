@@ -83,9 +83,9 @@ export function HistoryScreen({ categories, paymentMethods, transactions, onSave
   };
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
-        <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-12">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <label className="block">
             <span className="text-sm font-bold text-slate-600">월</span>
             <input
@@ -150,7 +150,7 @@ export function HistoryScreen({ categories, paymentMethods, transactions, onSave
       </section>
 
       {editing ? (
-        <section className="rounded-lg border border-blue-100 bg-white p-4 shadow-soft">
+        <section className="rounded-lg border border-blue-100 bg-white p-4 shadow-soft lg:col-span-5 lg:sticky lg:top-28">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-black text-ink">거래 수정</h2>
             <button
@@ -174,22 +174,24 @@ export function HistoryScreen({ categories, paymentMethods, transactions, onSave
         </section>
       ) : null}
 
-      <section className="space-y-3">
+      <section className={`space-y-3 ${editing ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-ink">거래 내역</h2>
           <span className="text-sm font-bold text-slate-500">{filtered.length}건</span>
         </div>
         {filtered.length > 0 ? (
-          filtered.map((transaction) => (
-            <TransactionListItem
-              key={transaction.id}
-              transaction={transaction}
-              categories={categories}
-              paymentMethods={paymentMethods}
-              onEdit={setEditing}
-              onDelete={handleDelete}
-            />
-          ))
+          <div className={`space-y-3 ${editing ? '' : 'lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0'}`}>
+            {filtered.map((transaction) => (
+              <TransactionListItem
+                key={transaction.id}
+                transaction={transaction}
+                categories={categories}
+                paymentMethods={paymentMethods}
+                onEdit={setEditing}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
         ) : (
           <EmptyState icon={<ListChecks className="h-6 w-6" />} title="조건에 맞는 거래가 없습니다" />
         )}

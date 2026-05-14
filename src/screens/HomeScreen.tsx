@@ -229,17 +229,17 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
 
   if (activeDetail && activeDetailCard) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
         <button
           type="button"
           onClick={() => setActiveDetail(null)}
-          className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-black text-navy shadow-soft active:bg-slate-100"
+          className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-black text-navy shadow-soft active:bg-slate-100 lg:col-span-12 lg:w-fit"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           홈으로 돌아가기
         </button>
 
-        <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
+        <section className="rounded-lg bg-navy p-5 text-white shadow-soft lg:col-span-4 lg:sticky lg:top-28">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-bold text-blue-100">{detailScopeLabel}</p>
@@ -254,7 +254,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
         </section>
 
         {activeTransactions.length > 0 ? (
-          <section className="space-y-3">
+          <section className="space-y-3 lg:col-span-8 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
             {activeTransactions.map((transaction) => (
               <TransactionListItem
                 key={transaction.id}
@@ -265,15 +265,17 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
             ))}
           </section>
         ) : (
-          <EmptyState icon={<ListChecks className="h-6 w-6" />} title="표시할 내역이 없습니다" />
+          <div className="lg:col-span-8">
+            <EmptyState icon={<ListChecks className="h-6 w-6" />} title="표시할 내역이 없습니다" />
+          </div>
         )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
+    <div className="space-y-5 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
+      <section className="rounded-lg bg-navy p-5 text-white shadow-soft lg:col-span-12">
         <p className="text-sm font-bold text-blue-100">{monthLabel(currentMonth)} 공동생활비</p>
         <div className="mt-3 flex items-start justify-between gap-4">
           <div>
@@ -293,7 +295,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3">
+      <section className="grid grid-cols-2 gap-3 lg:col-span-8 lg:grid-cols-3">
         {detailCards.map((card) => (
           <StatCard
             key={card.key}
@@ -306,7 +308,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
         ))}
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
         <h2 className="text-lg font-black text-ink">공동생활비 한도</h2>
         <div className="mt-4 grid gap-3">
           {[
@@ -342,7 +344,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-ink">TOP 지출 카테고리</h2>
           <Crown className="h-5 w-5 text-honey" aria-hidden />
@@ -371,7 +373,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
         )}
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-3 lg:col-span-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-ink">최근 거래</h2>
           <button type="button" onClick={onShowHistory} className="rounded-lg px-3 py-2 text-sm font-black text-ocean">

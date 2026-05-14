@@ -121,8 +121,8 @@ export function RecurringScreen({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
+      <div className="flex items-center justify-between lg:col-span-12">
         <button type="button" onClick={onBack} className="rounded-lg px-3 py-2 text-sm font-black text-ocean">
           설정
         </button>
@@ -136,7 +136,7 @@ export function RecurringScreen({
         </button>
       </div>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-5 lg:sticky lg:top-28">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-black text-ink">{editing ? '반복 지출 수정' : '반복 지출 추가'}</h2>
           {editing ? (
@@ -305,50 +305,52 @@ export function RecurringScreen({
         </form>
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-3 lg:col-span-7">
         <h2 className="text-lg font-black text-ink">반복 지출 목록</h2>
         {recurringTransactions.length > 0 ? (
-          recurringTransactions.map((item) => (
-            <article key={item.id} className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-skywash px-2.5 py-1 text-xs font-bold text-navy">
-                      {item.is_active ? '활성' : '중지'}
-                    </span>
-                    <span className="text-xs font-bold text-slate-500">매월 {item.day_of_month}일</span>
+          <div className="space-y-3 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
+            {recurringTransactions.map((item) => (
+              <article key={item.id} className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-skywash px-2.5 py-1 text-xs font-bold text-navy">
+                        {item.is_active ? '활성' : '중지'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">매월 {item.day_of_month}일</span>
+                    </div>
+                    <h3 className="mt-2 font-black text-ink">{item.recurring_label}</h3>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">
+                      {categoryName(categories, item.category_id)} · {paymentMethodName(paymentMethods, item.payment_method_id)} ·{' '}
+                      {item.author_name}
+                      {item.is_shared ? ' · 공동' : ''}
+                    </p>
                   </div>
-                  <h3 className="mt-2 font-black text-ink">{item.recurring_label}</h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    {categoryName(categories, item.category_id)} · {paymentMethodName(paymentMethods, item.payment_method_id)} ·{' '}
-                    {item.author_name}
-                    {item.is_shared ? ' · 공동' : ''}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-black text-warm">-{currencyFormatter.format(item.amount)}</p>
-                  <div className="mt-3 flex justify-end gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setEditing(item)}
-                      className="rounded-lg px-3 py-2 text-sm font-black text-ocean active:bg-slate-100"
-                    >
-                      수정
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(item)}
-                      className="rounded-lg p-2 text-warm active:bg-orange-50"
-                      aria-label="삭제"
-                      title="삭제"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </button>
+                  <div className="text-right">
+                    <p className="text-lg font-black text-warm">-{currencyFormatter.format(item.amount)}</p>
+                    <div className="mt-3 flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(item)}
+                        className="rounded-lg px-3 py-2 text-sm font-black text-ocean active:bg-slate-100"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(item)}
+                        className="rounded-lg p-2 text-warm active:bg-orange-50"
+                        aria-label="삭제"
+                        title="삭제"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            ))}
+          </div>
         ) : (
           <EmptyState icon={<Repeat className="h-6 w-6" />} title="반복 지출이 없습니다" />
         )}

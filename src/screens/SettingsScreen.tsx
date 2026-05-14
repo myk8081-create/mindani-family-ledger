@@ -168,8 +168,8 @@ export function SettingsScreen({
   };
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+    <div className="space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
         <h2 className="text-lg font-black text-ink">가족 그룹</h2>
         <div className="mt-4 rounded-lg bg-skywash p-4">
           <p className="text-sm font-bold text-slate-500">그룹명</p>
@@ -178,7 +178,7 @@ export function SettingsScreen({
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
         <h2 className="text-lg font-black text-ink">반복 지출</h2>
         <button
           type="button"
@@ -190,7 +190,7 @@ export function SettingsScreen({
         </button>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
         <h2 className="text-lg font-black text-ink">공동생활비 한도</h2>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <label className="block">
@@ -258,7 +258,7 @@ export function SettingsScreen({
         </button>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-6">
         <h2 className="text-lg font-black text-ink">백업</h2>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
@@ -296,7 +296,7 @@ export function SettingsScreen({
         />
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-3">
         <h2 className="text-lg font-black text-ink">데이터</h2>
         <button
           type="button"
@@ -309,7 +309,7 @@ export function SettingsScreen({
         </button>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-3">
         <h2 className="text-lg font-black text-ink">계정</h2>
         <button
           type="button"
@@ -321,8 +321,8 @@ export function SettingsScreen({
         </button>
       </section>
 
-      {error ? <p className="rounded-lg bg-warm/10 px-4 py-3 text-sm font-bold text-warm">{error}</p> : null}
-      {message ? <p className="rounded-lg bg-mint/10 px-4 py-3 text-sm font-bold text-teal-700">{message}</p> : null}
+      {error ? <p className="rounded-lg bg-warm/10 px-4 py-3 text-sm font-bold text-warm lg:col-span-12">{error}</p> : null}
+      {message ? <p className="rounded-lg bg-mint/10 px-4 py-3 text-sm font-bold text-teal-700 lg:col-span-12">{message}</p> : null}
     </div>
   );
 }
