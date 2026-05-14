@@ -118,7 +118,13 @@ export default function App() {
           />
         ) : null}
 
-        {screen === 'stats' ? <StatsScreen categories={ledger.categories} transactions={ledger.transactions} /> : null}
+        {screen === 'stats' ? (
+          <StatsScreen
+            categories={ledger.categories}
+            paymentMethods={ledger.paymentMethods}
+            transactions={ledger.transactions}
+          />
+        ) : null}
 
         {screen === 'settings' ? (
           <SettingsScreen

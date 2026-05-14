@@ -18,9 +18,14 @@ export const categoryName = (categories: Category[], id: string | null | undefin
 export const paymentMethodName = (methods: PaymentMethod[], id: string | null | undefined) =>
   findPaymentMethod(methods, id)?.name ?? '기타';
 
-export const isCardTransaction = (transaction: Transaction, methods: PaymentMethod[]) => {
+export const isCreditCardTransaction = (transaction: Transaction, methods: PaymentMethod[]) => {
   const method = findPaymentMethod(methods, transaction.payment_method_id);
-  return transaction.type === 'expense' && Boolean(method?.name.includes('카드'));
+  return transaction.type === 'expense' && Boolean(method?.name.includes('신용카드'));
+};
+
+export const isCashLikeTransaction = (transaction: Transaction, methods: PaymentMethod[]) => {
+  const method = findPaymentMethod(methods, transaction.payment_method_id);
+  return transaction.type === 'expense' && Boolean(method && ['현금', '체크카드'].includes(method.name));
 };
 
 export const childCategories = (categories: Category[], parentId: string | null | undefined) =>
