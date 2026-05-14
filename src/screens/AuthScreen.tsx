@@ -19,10 +19,11 @@ export function AuthScreen({ hasConfig, authError, onSignIn, onSignUp }: AuthScr
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
     setLoading(true);
     setError(null);
     setMessage(null);
-    const result = mode === 'login' ? await onSignIn(email, password) : await onSignUp(email, password);
+    const result = mode === 'login' ? await onSignIn(normalizedEmail, password) : await onSignUp(normalizedEmail, password);
     const resultError = result.error instanceof Error ? result.error.message : null;
     if (resultError) {
       setError(resultError);
