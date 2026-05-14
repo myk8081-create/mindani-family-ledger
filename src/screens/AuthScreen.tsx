@@ -1,6 +1,7 @@
 import { LockKeyhole, Mail, WalletCards } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { APP_DISPLAY_NAME } from '../lib/constants';
 
 interface AuthScreenProps {
   hasConfig: boolean;
@@ -35,13 +36,13 @@ export function AuthScreen({ hasConfig, authError, onSignIn, onSignUp }: AuthScr
   };
 
   return (
-    <main className="min-h-dvh bg-[radial-gradient(circle_at_top_right,#d9ecff_0,#f8fbff_34%,#f6f8fb_100%)] px-5 py-8 text-ink">
+    <main className="app-auth-bg min-h-dvh px-5 py-8 text-ink">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-md flex-col justify-center">
-        <div className="mb-8">
+        <div className="mb-8 rounded-lg bg-white/70 p-4 shadow-soft backdrop-blur">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
             <WalletCards className="h-9 w-9" aria-hidden />
           </div>
-          <h1 className="text-3xl font-black tracking-normal">민다니 패밀리 가계부</h1>
+          <h1 className="text-3xl font-black tracking-normal">{APP_DISPLAY_NAME}</h1>
           <p className="mt-2 text-base font-semibold text-slate-600">민다니와 찌미찌미의 공동 가계부</p>
         </div>
 

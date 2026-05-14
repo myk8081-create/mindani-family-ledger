@@ -2,6 +2,7 @@ import type { AuthorName, TransactionFormValues } from '../types';
 import { todayISO } from './date';
 
 export const FAMILY_GROUP_NAME = '민다니 패밀리';
+export const APP_DISPLAY_NAME = '민다니&찌미찌미';
 export const FAMILY_AUTHORS: AuthorName[] = ['민다니', '찌미찌미'];
 
 export const EXPENSE_CATEGORY_NAMES = [

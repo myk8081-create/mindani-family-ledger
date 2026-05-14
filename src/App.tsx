@@ -4,6 +4,7 @@ import { BottomNav } from './components/BottomNav';
 import { SyncBadge } from './components/SyncBadge';
 import { useAuth } from './hooks/useAuth';
 import { useFamilyLedger } from './hooks/useFamilyLedger';
+import { APP_DISPLAY_NAME } from './lib/constants';
 import { AuthScreen } from './screens/AuthScreen';
 import { EntryScreen } from './screens/EntryScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
@@ -25,12 +26,12 @@ const titles: Record<AppScreen, string> = {
 
 function LoadingScreen() {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[#f8fbff] px-6 text-ink">
-      <div className="text-center">
+    <main className="app-photo-bg flex min-h-dvh items-center justify-center px-6 text-ink">
+      <div className="rounded-lg bg-white/80 p-6 text-center shadow-soft backdrop-blur">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
           <WalletCards className="h-9 w-9" aria-hidden />
         </div>
-        <p className="text-lg font-black">민다니 패밀리 가계부</p>
+        <p className="text-lg font-black">{APP_DISPLAY_NAME}</p>
       </div>
     </main>
   );
@@ -64,11 +65,11 @@ export default function App() {
   const activeTab = screen === 'recurring' ? 'settings' : screen;
 
   return (
-    <main className="min-h-dvh bg-[#f8fbff] text-ink">
+    <main className="app-photo-bg min-h-dvh text-ink">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#f8fbff]/90 px-5 pb-3 pt-[calc(env(safe-area-inset-top)+14px)] backdrop-blur">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-500">{ledger.familyGroup?.name ?? '민다니 패밀리'}</p>
+            <p className="truncate text-sm font-bold text-slate-500">{APP_DISPLAY_NAME}</p>
             <h1 className="truncate text-2xl font-black tracking-normal text-ink">{titles[screen]}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-2">

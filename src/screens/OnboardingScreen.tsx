@@ -26,13 +26,15 @@ export function OnboardingScreen({ onClaim, onSignOut }: OnboardingScreenProps) 
   };
 
   return (
-    <main className="min-h-dvh bg-[radial-gradient(circle_at_top_right,#d9ecff_0,#f8fbff_34%,#f6f8fb_100%)] px-5 py-8 text-ink">
+    <main className="app-photo-bg min-h-dvh px-5 py-8 text-ink">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-md flex-col justify-center">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
-          <Users className="h-9 w-9" aria-hidden />
+        <div className="rounded-lg bg-white/80 p-5 shadow-soft backdrop-blur">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
+            <Users className="h-9 w-9" aria-hidden />
+          </div>
+          <h1 className="text-3xl font-black tracking-normal">{FAMILY_GROUP_NAME}</h1>
+          <p className="mt-2 text-sm font-semibold text-slate-500">초대 코드: {DEFAULT_INVITE_CODE}</p>
         </div>
-        <h1 className="text-3xl font-black tracking-normal">{FAMILY_GROUP_NAME}</h1>
-        <p className="mt-2 text-sm font-semibold text-slate-500">초대 코드: {DEFAULT_INVITE_CODE}</p>
 
         <section className="mt-6 rounded-lg border border-white bg-white/90 p-5 shadow-soft backdrop-blur">
           <div className="space-y-2">
