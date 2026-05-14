@@ -26,8 +26,8 @@ const titles: Record<AppScreen, string> = {
 
 function LoadingScreen() {
   return (
-    <main className="app-photo-bg flex min-h-dvh items-center justify-center px-6 text-ink">
-      <div className="rounded-lg bg-white/80 p-6 text-center shadow-soft backdrop-blur">
+    <main className="flex min-h-dvh items-center justify-center bg-[#f8fbff] px-6 text-ink">
+      <div className="text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
           <WalletCards className="h-9 w-9" aria-hidden />
         </div>
@@ -65,7 +65,7 @@ export default function App() {
   const activeTab = screen === 'recurring' ? 'settings' : screen;
 
   return (
-    <main className="app-photo-bg min-h-dvh text-ink">
+    <main className="min-h-dvh bg-[#f8fbff] text-ink">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#f8fbff]/90 px-5 pb-3 pt-[calc(env(safe-area-inset-top)+14px)] backdrop-blur">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <div className="min-w-0">

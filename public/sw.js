@@ -1,5 +1,5 @@
-const CACHE_NAME = 'mindani-family-ledger-v2';
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon.svg', '/images/mindani-jjimijjimi-bg.jpg'];
+const CACHE_NAME = 'mindani-family-ledger-v3';
+const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -36,9 +36,9 @@ export function AuthScreen({ hasConfig, authError, onSignIn, onSignUp }: AuthScr
   };
 
   return (
-    <main className="app-auth-bg min-h-dvh px-5 py-8 text-ink">
+    <main className="min-h-dvh bg-[radial-gradient(circle_at_top_right,#d9ecff_0,#f8fbff_34%,#f6f8fb_100%)] px-5 py-8 text-ink">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-md flex-col justify-center">
-        <div className="mb-8 rounded-lg bg-white/70 p-4 shadow-soft backdrop-blur">
+        <div className="mb-8">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-lg bg-navy text-white shadow-soft">
             <WalletCards className="h-9 w-9" aria-hidden />
           </div>
