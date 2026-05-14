@@ -184,15 +184,26 @@ export function TransactionForm({
       </label>
 
       {values.type === 'expense' ? (
-        <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
-          <span>고정지출</span>
-          <input
-            type="checkbox"
-            checked={values.is_fixed}
-            onChange={(event) => setValue('is_fixed', event.target.checked)}
-            className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
-          />
-        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+            <span>공동생활비</span>
+            <input
+              type="checkbox"
+              checked={values.is_shared}
+              onChange={(event) => setValue('is_shared', event.target.checked)}
+              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+            />
+          </label>
+          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+            <span>고정지출</span>
+            <input
+              type="checkbox"
+              checked={values.is_fixed}
+              onChange={(event) => setValue('is_fixed', event.target.checked)}
+              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+            />
+          </label>
+        </div>
       ) : null}
 
       {error ? <p className="rounded-lg bg-warm/10 px-3 py-2 text-sm font-bold text-warm">{error}</p> : null}

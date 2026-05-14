@@ -46,6 +46,7 @@ export function TransactionListItem({
           <p className="mt-1 line-clamp-2 text-sm text-slate-500">
             {transaction.author_name}
             {method ? ` · ${method}` : ''}
+            {transaction.is_shared ? ' · 공동' : ''}
             {transaction.is_fixed ? ' · 고정' : ''}
             {transaction.memo ? ` · ${transaction.memo}` : ''}
           </p>

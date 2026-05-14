@@ -39,6 +39,7 @@ export const emptyTransactionForm = (authorName: AuthorName): TransactionFormVal
   author_name: authorName,
   memo: '',
   is_fixed: false,
+  is_shared: false,
 });
 
 export const currencyFormatter = new Intl.NumberFormat('ko-KR', {

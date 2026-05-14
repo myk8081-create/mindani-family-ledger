@@ -86,6 +86,7 @@ const rowToTransaction = (row: Record<string, unknown>): Transaction => ({
   author_name: row.author_name as AuthorName,
   memo: row.memo ? String(row.memo) : null,
   is_fixed: Boolean(row.is_fixed),
+  is_shared: Boolean(row.is_shared),
   created_at: String(row.created_at),
   updated_at: String(row.updated_at),
   deleted_at: row.deleted_at ? String(row.deleted_at) : null,
@@ -104,6 +105,7 @@ const rowToRecurring = (row: Record<string, unknown>): RecurringTransaction => (
   author_name: row.author_name as AuthorName,
   memo: row.memo ? String(row.memo) : null,
   is_active: Boolean(row.is_active),
+  is_shared: Boolean(row.is_shared),
   last_generated_month: row.last_generated_month ? String(row.last_generated_month) : null,
   created_at: String(row.created_at),
   updated_at: String(row.updated_at),
@@ -471,6 +473,7 @@ export const useFamilyLedger = (user: User | null) => {
         author_name: values.author_name,
         memo: values.memo.trim() || null,
         is_fixed: values.is_fixed,
+        is_shared: values.type === 'expense' ? values.is_shared : false,
         deleted_at: null,
       };
 
@@ -561,6 +564,7 @@ export const useFamilyLedger = (user: User | null) => {
         author_name: values.author_name,
         memo: values.memo.trim() || null,
         is_active: values.is_active,
+        is_shared: values.is_shared,
         deleted_at: null,
       };
 
@@ -664,6 +668,7 @@ export const useFamilyLedger = (user: User | null) => {
         author_name: item.author_name,
         memo: item.memo || item.recurring_label,
         is_fixed: true,
+        is_shared: item.is_shared,
       }));
 
       const insertResult = await client.from('transactions').insert(transactionRows);
@@ -763,6 +768,7 @@ export const useFamilyLedger = (user: User | null) => {
             author_name: transaction.author_name,
             memo: transaction.memo,
             is_fixed: transaction.is_fixed,
+            is_shared: transaction.is_shared,
           };
         })
         .filter((transaction) => transaction.category_id);
@@ -785,6 +791,7 @@ export const useFamilyLedger = (user: User | null) => {
             author_name: item.author_name,
             memo: item.memo,
             is_active: item.is_active,
+            is_shared: item.is_shared,
             last_generated_month: item.last_generated_month,
           };
         })

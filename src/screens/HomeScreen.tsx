@@ -1,4 +1,4 @@
-import { Cat, CircleDollarSign, Crown, ListChecks, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { Cat, CircleDollarSign, Crown, ListChecks, TrendingDown, TrendingUp, Users, Wallet } from 'lucide-react';
 import { useMemo } from 'react';
 import { EmptyState } from '../components/EmptyState';
 import { StatCard } from '../components/StatCard';
@@ -32,6 +32,9 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
     const jjimiExpense = monthTransactions
       .filter((transaction) => transaction.type === 'expense' && transaction.author_name === '찌미찌미')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const sharedExpense = monthTransactions
+      .filter((transaction) => transaction.type === 'expense' && transaction.is_shared)
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
     const catExpense = monthTransactions
       .filter((transaction) => transaction.type === 'expense' && isCatTransaction(transaction, categories))
       .reduce((sum, transaction) => sum + transaction.amount, 0);
@@ -55,6 +58,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
       balance: income - expense,
       mindaniExpense,
       jjimiExpense,
+      sharedExpense,
       catExpense,
       topCategories,
       recent: [...transactions].slice(0, 5),
@@ -81,7 +85,10 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
         <StatCard label="찌미찌미 지출" value={summary.jjimiExpense} tone="blue" icon={<CircleDollarSign className="h-5 w-5" />} />
       </section>
 
-      <StatCard label="고양이 지출" value={summary.catExpense} tone="plain" icon={<Cat className="h-5 w-5" />} />
+      <section className="grid grid-cols-2 gap-3">
+        <StatCard label="공동생활비" value={summary.sharedExpense} tone="mint" icon={<Users className="h-5 w-5" />} />
+        <StatCard label="고양이 지출" value={summary.catExpense} tone="plain" icon={<Cat className="h-5 w-5" />} />
+      </section>
 
       <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
         <div className="flex items-center justify-between">

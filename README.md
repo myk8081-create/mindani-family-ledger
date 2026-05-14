@@ -9,6 +9,7 @@
 - 가족 구성원 `민다니`, `찌미찌미`
 - 같은 가족 그룹의 거래, 카테고리, 결제수단, 반복 지출만 공유
 - 거래 입력, 수정, 삭제, 월별/작성자별/카테고리별/수입·지출 필터, 검색
+- 공동생활비 체크 및 홈/통계 합계 확인
 - Supabase Realtime 기반 실시간 반영
 - 홈 대시보드와 Recharts 통계
 - 반복 지출 등록 및 이번 달 거래 생성
@@ -39,6 +40,8 @@ npm run dev
 ## Supabase 테이블 생성 SQL 적용
 
 Supabase SQL Editor에서 [supabase/schema.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/schema.sql)의 전체 내용을 실행합니다.
+
+이미 기존 SQL을 적용한 프로젝트에서 공동생활비 기능만 추가하려면 [supabase/add-shared-expense.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/add-shared-expense.sql)을 한 번 실행해도 됩니다.
 
 이 SQL에는 다음이 포함되어 있습니다.
 
@@ -98,8 +101,9 @@ VITE_DEFAULT_FAMILY_INVITE_CODE=MINDANI-FAMILY-2026
 1. 민다니와 찌미찌미가 각각 이메일/비밀번호로 회원가입합니다.
 2. 로그인 후 본인 이름을 선택해 `민다니 패밀리`에 연결합니다.
 3. 하단 탭에서 홈, 입력, 내역, 통계, 설정을 사용합니다.
-4. 반복 지출은 설정 > 반복 지출 관리에서 등록하고 `이번 달 생성`으로 거래에 반영합니다.
-5. 백업은 설정에서 CSV 또는 JSON으로 내려받고, JSON 파일로 복원할 수 있습니다.
+4. 둘이 함께 쓴 돈은 거래 입력에서 `공동생활비`를 체크합니다.
+5. 반복 지출은 설정 > 반복 지출 관리에서 등록하고 `이번 달 생성`으로 거래에 반영합니다.
+6. 백업은 설정에서 CSV 또는 JSON으로 내려받고, JSON 파일로 복원할 수 있습니다.
 
 ## 개발 명령어
 

@@ -34,7 +34,18 @@ const csvCell = (value: string | number | null | undefined) => {
 };
 
 const buildCsv = (transactions: Transaction[], categories: Category[], paymentMethods: PaymentMethod[]) => {
-  const header = ['날짜', '구분', '금액', '카테고리', '세부카테고리', '결제수단', '작성자', '고정지출', '메모'];
+  const header = [
+    '날짜',
+    '구분',
+    '금액',
+    '카테고리',
+    '세부카테고리',
+    '결제수단',
+    '작성자',
+    '공동생활비',
+    '고정지출',
+    '메모',
+  ];
   const rows = transactions.map((transaction) => [
     transaction.transaction_date,
     transaction.type === 'expense' ? '지출' : '수입',
@@ -43,6 +54,7 @@ const buildCsv = (transactions: Transaction[], categories: Category[], paymentMe
     transaction.subcategory_id ? categoryName(categories, transaction.subcategory_id) : '',
     transaction.payment_method_id ? paymentMethodName(paymentMethods, transaction.payment_method_id) : '',
     transaction.author_name,
+    transaction.is_shared ? 'Y' : 'N',
     transaction.is_fixed ? 'Y' : 'N',
     transaction.memo ?? '',
   ]);

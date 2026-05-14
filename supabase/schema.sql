@@ -85,6 +85,7 @@ create table if not exists public.transactions (
   author_name text not null check (author_name in ('민다니', '찌미찌미')),
   memo text,
   is_fixed boolean not null default false,
+  is_shared boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
@@ -107,6 +108,7 @@ create table if not exists public.recurring_transactions (
   author_name text not null check (author_name in ('민다니', '찌미찌미')),
   memo text,
   is_active boolean not null default true,
+  is_shared boolean not null default false,
   last_generated_month text check (last_generated_month is null or last_generated_month ~ '^[0-9]{4}-[0-9]{2}$'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -116,6 +118,12 @@ create table if not exists public.recurring_transactions (
 create index if not exists recurring_transactions_family_idx
   on public.recurring_transactions(family_group_id, is_active)
   where deleted_at is null;
+
+alter table if exists public.transactions
+  add column if not exists is_shared boolean not null default false;
+
+alter table if exists public.recurring_transactions
+  add column if not exists is_shared boolean not null default false;
 
 create or replace function public.set_updated_at()
 returns trigger

@@ -1,4 +1,4 @@
-import { BarChart3, Cat, Repeat } from 'lucide-react';
+import { BarChart3, Cat, Repeat, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import {
   Bar,
@@ -80,6 +80,9 @@ export function StatsScreen({ categories, transactions }: StatsScreenProps) {
     const catExpense = currentExpense
       .filter((transaction) => isCatTransaction(transaction, categories))
       .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const sharedExpense = currentExpense
+      .filter((transaction) => transaction.is_shared)
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
 
     return {
       monthly,
@@ -87,6 +90,7 @@ export function StatsScreen({ categories, transactions }: StatsScreenProps) {
       author,
       fixedExpense,
       catExpense,
+      sharedExpense,
     };
   }, [categories, currentMonth, transactions]);
 
@@ -102,6 +106,7 @@ export function StatsScreen({ categories, transactions }: StatsScreenProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="고정지출" value={stats.fixedExpense} tone="warm" icon={<Repeat className="h-5 w-5" />} />
+        <StatCard label="공동생활비" value={stats.sharedExpense} tone="mint" icon={<Users className="h-5 w-5" />} />
         <StatCard label="고양이 지출" value={stats.catExpense} tone="plain" icon={<Cat className="h-5 w-5" />} />
       </div>
 

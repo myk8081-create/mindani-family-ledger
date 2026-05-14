@@ -25,6 +25,7 @@ const formFromTransaction = (transaction: Transaction): TransactionFormValues =>
   author_name: transaction.author_name,
   memo: transaction.memo ?? '',
   is_fixed: transaction.is_fixed,
+  is_shared: transaction.is_shared,
 });
 
 export function HistoryScreen({ categories, paymentMethods, transactions, onSave, onDelete }: HistoryScreenProps) {

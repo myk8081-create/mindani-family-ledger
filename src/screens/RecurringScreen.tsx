@@ -33,6 +33,7 @@ const defaultForm = (
     payment_method_id: paymentMethods[0]?.id ?? '',
     author_name: authorName,
     memo: '',
+    is_shared: false,
     is_active: true,
   };
 };
@@ -46,6 +47,7 @@ const formFromRecurring = (item: RecurringTransaction): RecurringFormValues => (
   payment_method_id: item.payment_method_id ?? '',
   author_name: item.author_name,
   memo: item.memo ?? '',
+  is_shared: item.is_shared,
   is_active: item.is_active,
 });
 
@@ -269,6 +271,16 @@ export function RecurringScreen({
             </label>
           </div>
 
+          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+            <span>공동생활비</span>
+            <input
+              type="checkbox"
+              checked={values.is_shared}
+              onChange={(event) => setValue('is_shared', event.target.checked)}
+              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+            />
+          </label>
+
           <label className="block">
             <span className="text-sm font-bold text-slate-600">메모</span>
             <input
@@ -310,6 +322,7 @@ export function RecurringScreen({
                   <p className="mt-1 text-sm font-semibold text-slate-500">
                     {categoryName(categories, item.category_id)} · {paymentMethodName(paymentMethods, item.payment_method_id)} ·{' '}
                     {item.author_name}
+                    {item.is_shared ? ' · 공동' : ''}
                   </p>
                 </div>
                 <div className="text-right">

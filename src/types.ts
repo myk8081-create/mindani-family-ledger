@@ -68,6 +68,7 @@ export interface Transaction {
   author_name: AuthorName;
   memo: string | null;
   is_fixed: boolean;
+  is_shared: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -87,6 +88,7 @@ export interface RecurringTransaction {
   author_name: AuthorName;
   memo: string | null;
   is_active: boolean;
+  is_shared: boolean;
   last_generated_month: string | null;
   created_at: string;
   updated_at: string;
@@ -104,6 +106,7 @@ export interface TransactionFormValues {
   author_name: AuthorName;
   memo: string;
   is_fixed: boolean;
+  is_shared: boolean;
 }
 
 export interface RecurringFormValues {
@@ -116,6 +119,7 @@ export interface RecurringFormValues {
   author_name: AuthorName;
   memo: string;
   is_active: boolean;
+  is_shared: boolean;
 }
 
 export interface LedgerBackup {
@@ -142,6 +146,7 @@ export interface DashboardSummary {
   balance: number;
   mindaniExpense: number;
   jjimiExpense: number;
+  sharedExpense: number;
   catExpense: number;
   topCategories: Array<{ name: string; value: number }>;
 }
