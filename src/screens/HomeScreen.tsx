@@ -29,17 +29,26 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
     const mindaniExpense = monthTransactions
       .filter(
         (transaction) =>
-          transaction.type === 'expense' && transaction.author_name === '민다니' && !transaction.is_shared,
+          transaction.type === 'expense' &&
+          transaction.author_name === '민다니' &&
+          !transaction.is_shared &&
+          !transaction.is_fixed,
       )
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const jjimiExpense = monthTransactions
       .filter(
         (transaction) =>
-          transaction.type === 'expense' && transaction.author_name === '찌미찌미' && !transaction.is_shared,
+          transaction.type === 'expense' &&
+          transaction.author_name === '찌미찌미' &&
+          !transaction.is_shared &&
+          !transaction.is_fixed,
       )
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const sharedExpense = monthTransactions
       .filter((transaction) => transaction.type === 'expense' && transaction.is_shared)
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const fixedExpense = monthTransactions
+      .filter((transaction) => transaction.type === 'expense' && transaction.is_fixed)
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const catExpense = monthTransactions
       .filter((transaction) => transaction.type === 'expense' && isCatTransaction(transaction, categories))
@@ -65,11 +74,15 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
       mindaniExpense,
       jjimiExpense,
       sharedExpense,
+      fixedExpense,
       catExpense,
       topCategories,
-      recent: transactions.filter((transaction) => !transaction.is_shared).slice(0, 5),
+      recent: transactions.filter((transaction) => !transaction.is_shared && !transaction.is_fixed).slice(0, 5),
       sharedRecent: monthTransactions
         .filter((transaction) => transaction.type === 'expense' && transaction.is_shared)
+        .slice(0, 5),
+      fixedRecent: monthTransactions
+        .filter((transaction) => transaction.type === 'expense' && transaction.is_fixed)
         .slice(0, 5),
     };
   }, [categories, currentMonth, transactions]);
@@ -96,6 +109,7 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
 
       <section className="grid grid-cols-2 gap-3">
         <StatCard label="공동생활비" value={summary.sharedExpense} tone="mint" icon={<Users className="h-5 w-5" />} />
+        <StatCard label="고정비" value={summary.fixedExpense} tone="warm" icon={<ListChecks className="h-5 w-5" />} />
         <StatCard label="고양이 지출" value={summary.catExpense} tone="plain" icon={<Cat className="h-5 w-5" />} />
       </section>
 
@@ -115,6 +129,25 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
           ))
         ) : (
           <EmptyState icon={<Users className="h-6 w-6" />} title="이번 달 공동생활비가 없습니다" />
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black text-ink">고정비 목록</h2>
+          <span className="text-sm font-bold text-slate-500">{summary.fixedRecent.length}건</span>
+        </div>
+        {summary.fixedRecent.length > 0 ? (
+          summary.fixedRecent.map((transaction) => (
+            <TransactionListItem
+              key={transaction.id}
+              transaction={transaction}
+              categories={categories}
+              paymentMethods={paymentMethods}
+            />
+          ))
+        ) : (
+          <EmptyState icon={<ListChecks className="h-6 w-6" />} title="이번 달 고정비가 없습니다" />
         )}
       </section>
 
