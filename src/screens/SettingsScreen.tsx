@@ -72,6 +72,8 @@ const buildCsv = (transactions: Transaction[], categories: Category[], paymentMe
   return [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
 };
 
+const cardClass = 'rounded-lg border border-slate-100 bg-white p-5 shadow-soft';
+
 export function SettingsScreen({
   familyGroup,
   categories,
@@ -168,161 +170,178 @@ export function SettingsScreen({
   };
 
   return (
-    <div className="space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 lg:space-y-0">
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
-        <h2 className="text-lg font-black text-ink">가족 그룹</h2>
-        <div className="mt-4 rounded-lg bg-skywash p-4">
-          <p className="text-sm font-bold text-slate-500">그룹명</p>
-          <p className="mt-1 text-xl font-black text-navy">{familyGroup?.name ?? FAMILY_GROUP_NAME}</p>
-          {familyGroup?.invite_code ? <p className="mt-2 text-sm font-bold text-slate-500">{familyGroup.invite_code}</p> : null}
+    <div className="mx-auto max-w-6xl space-y-5">
+      <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-bold text-blue-100">가족 그룹</p>
+            <h2 className="mt-2 text-3xl font-black tracking-normal">{familyGroup?.name ?? FAMILY_GROUP_NAME}</h2>
+          </div>
+          {familyGroup?.invite_code ? (
+            <div className="rounded-lg bg-white/10 px-4 py-3 text-sm font-black text-blue-100">
+              {familyGroup.invite_code}
+            </div>
+          ) : null}
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
-        <h2 className="text-lg font-black text-ink">반복 지출</h2>
-        <button
-          type="button"
-          onClick={onOpenRecurring}
-          className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 font-black text-white shadow-soft"
-        >
-          <Repeat className="h-5 w-5" aria-hidden />
-          반복 지출 관리
-        </button>
-      </section>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-5">
+          <section className={cardClass}>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-black text-ink">공동생활비 한도</h2>
+              <button
+                type="button"
+                onClick={() => void handleBudgetSave()}
+                disabled={busy}
+                className="min-h-11 rounded-lg bg-navy px-5 text-sm font-black text-white shadow-soft disabled:opacity-60"
+              >
+                저장
+              </button>
+            </div>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-4">
-        <h2 className="text-lg font-black text-ink">공동생활비 한도</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className="text-sm font-bold text-slate-600">주간 한도</span>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <label className="block">
+                  <span className="text-sm font-bold text-slate-600">주간 한도</span>
+                  <input
+                    value={budgetValues.weekly_amount}
+                    onChange={(event) =>
+                      setBudgetValues((previous) => ({
+                        ...previous,
+                        weekly_amount: event.target.value.replace(/[^\d,]/g, ''),
+                      }))
+                    }
+                    inputMode="numeric"
+                    placeholder="0"
+                    className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
+                  />
+                </label>
+                <label className="mt-3 flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+                  <span>주간 이월</span>
+                  <input
+                    type="checkbox"
+                    checked={budgetValues.weekly_carryover_enabled}
+                    onChange={(event) =>
+                      setBudgetValues((previous) => ({ ...previous, weekly_carryover_enabled: event.target.checked }))
+                    }
+                    className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+                  />
+                </label>
+              </div>
+
+              <div className="rounded-lg border border-blue-100 bg-skywash p-4">
+                <label className="block">
+                  <span className="text-sm font-bold text-slate-600">월간 한도</span>
+                  <input
+                    value={budgetValues.monthly_amount}
+                    onChange={(event) =>
+                      setBudgetValues((previous) => ({
+                        ...previous,
+                        monthly_amount: event.target.value.replace(/[^\d,]/g, ''),
+                      }))
+                    }
+                    inputMode="numeric"
+                    placeholder="0"
+                    className="mt-2 h-12 w-full rounded-lg border border-blue-100 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
+                  />
+                </label>
+                <label className="mt-3 flex min-h-12 items-center justify-between rounded-lg border border-blue-100 bg-white px-4 font-bold text-ink">
+                  <span>월간 이월</span>
+                  <input
+                    type="checkbox"
+                    checked={budgetValues.monthly_carryover_enabled}
+                    onChange={(event) =>
+                      setBudgetValues((previous) => ({ ...previous, monthly_carryover_enabled: event.target.checked }))
+                    }
+                    className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+                  />
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section className={cardClass}>
+            <h2 className="text-xl font-black text-ink">백업과 복원</h2>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <button
+                type="button"
+                onClick={exportCsv}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 font-black text-ink"
+              >
+                <Download className="h-4 w-4" aria-hidden />
+                CSV
+              </button>
+              <button
+                type="button"
+                onClick={exportJson}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 font-black text-ink"
+              >
+                <Download className="h-4 w-4" aria-hidden />
+                JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={busy}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-blue-100 bg-skywash px-4 font-black text-navy disabled:opacity-60"
+              >
+                <Upload className="h-4 w-4" aria-hidden />
+                JSON 복원
+              </button>
+            </div>
             <input
-              value={budgetValues.weekly_amount}
-              onChange={(event) =>
-                setBudgetValues((previous) => ({
-                  ...previous,
-                  weekly_amount: event.target.value.replace(/[^\d,]/g, ''),
-                }))
-              }
-              inputMode="numeric"
-              placeholder="0"
-              className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(event) => void handleRestore(event.target.files?.[0])}
             />
-          </label>
-          <label className="block">
-            <span className="text-sm font-bold text-slate-600">월간 한도</span>
-            <input
-              value={budgetValues.monthly_amount}
-              onChange={(event) =>
-                setBudgetValues((previous) => ({
-                  ...previous,
-                  monthly_amount: event.target.value.replace(/[^\d,]/g, ''),
-                }))
-              }
-              inputMode="numeric"
-              placeholder="0"
-              className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
-            />
-          </label>
+          </section>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
-            <span>주간 이월</span>
-            <input
-              type="checkbox"
-              checked={budgetValues.weekly_carryover_enabled}
-              onChange={(event) =>
-                setBudgetValues((previous) => ({ ...previous, weekly_carryover_enabled: event.target.checked }))
-              }
-              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
-            />
-          </label>
-          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
-            <span>월간 이월</span>
-            <input
-              type="checkbox"
-              checked={budgetValues.monthly_carryover_enabled}
-              onChange={(event) =>
-                setBudgetValues((previous) => ({ ...previous, monthly_carryover_enabled: event.target.checked }))
-              }
-              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
-            />
-          </label>
-        </div>
-        <button
-          type="button"
-          onClick={() => void handleBudgetSave()}
-          disabled={busy}
-          className="mt-3 min-h-12 w-full rounded-lg bg-navy px-4 font-black text-white shadow-soft disabled:opacity-60"
-        >
-          한도 저장
-        </button>
-      </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-6">
-        <h2 className="text-lg font-black text-ink">백업</h2>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={exportCsv}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 font-black text-ink"
-          >
-            <Download className="h-4 w-4" aria-hidden />
-            CSV
-          </button>
-          <button
-            type="button"
-            onClick={exportJson}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 font-black text-ink"
-          >
-            <Download className="h-4 w-4" aria-hidden />
-            JSON
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={busy}
-          className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-blue-100 bg-skywash px-4 font-black text-navy disabled:opacity-60"
-        >
-          <Upload className="h-4 w-4" aria-hidden />
-          JSON 복원
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json,.json"
-          className="hidden"
-          onChange={(event) => void handleRestore(event.target.files?.[0])}
-        />
-      </section>
+        <aside className="space-y-5">
+          <section className={cardClass}>
+            <h2 className="text-xl font-black text-ink">반복 지출</h2>
+            <button
+              type="button"
+              onClick={onOpenRecurring}
+              className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 font-black text-white shadow-soft"
+            >
+              <Repeat className="h-5 w-5" aria-hidden />
+              반복 지출 관리
+            </button>
+          </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-3">
-        <h2 className="text-lg font-black text-ink">데이터</h2>
-        <button
-          type="button"
-          onClick={() => void handleReset()}
-          disabled={busy}
-          className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-warm px-4 font-black text-white shadow-soft disabled:opacity-60"
-        >
-          <RotateCcw className="h-5 w-5" aria-hidden />
-          전체 데이터 초기화
-        </button>
-      </section>
+          <section className={cardClass}>
+            <h2 className="text-xl font-black text-ink">데이터</h2>
+            <button
+              type="button"
+              onClick={() => void handleReset()}
+              disabled={busy}
+              className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-warm px-4 font-black text-white shadow-soft disabled:opacity-60"
+            >
+              <RotateCcw className="h-5 w-5" aria-hidden />
+              전체 데이터 초기화
+            </button>
+          </section>
 
-      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft lg:col-span-3">
-        <h2 className="text-lg font-black text-ink">계정</h2>
-        <button
-          type="button"
-          onClick={() => void onSignOut()}
-          className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 font-black text-slate-700"
-        >
-          <LogOut className="h-5 w-5" aria-hidden />
-          로그아웃
-        </button>
-      </section>
+          <section className={cardClass}>
+            <h2 className="text-xl font-black text-ink">계정</h2>
+            <button
+              type="button"
+              onClick={() => void onSignOut()}
+              className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 font-black text-slate-700"
+            >
+              <LogOut className="h-5 w-5" aria-hidden />
+              로그아웃
+            </button>
+          </section>
+        </aside>
+      </div>
 
-      {error ? <p className="rounded-lg bg-warm/10 px-4 py-3 text-sm font-bold text-warm lg:col-span-12">{error}</p> : null}
-      {message ? <p className="rounded-lg bg-mint/10 px-4 py-3 text-sm font-bold text-teal-700 lg:col-span-12">{message}</p> : null}
+      {error ? <p className="rounded-lg bg-warm/10 px-4 py-3 text-sm font-bold text-warm">{error}</p> : null}
+      {message ? <p className="rounded-lg bg-mint/10 px-4 py-3 text-sm font-bold text-teal-700">{message}</p> : null}
     </div>
   );
 }
