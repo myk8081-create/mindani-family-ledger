@@ -49,7 +49,9 @@ export function TransactionForm({
 
   useEffect(() => {
     if (paymentMethods.length > 0 && !values.payment_method_id) {
-      setValues((previous) => ({ ...previous, payment_method_id: paymentMethods[0].id }));
+      const cashMethod =
+        paymentMethods.find((method) => method.name.replace(/\s/g, '').includes('현금')) ?? paymentMethods[0];
+      setValues((previous) => ({ ...previous, payment_method_id: cashMethod.id }));
     }
   }, [paymentMethods, values.payment_method_id]);
 
