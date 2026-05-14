@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Banknote,
   Cat,
   CircleDollarSign,
@@ -8,9 +9,8 @@ import {
   TrendingDown,
   TrendingUp,
   Users,
-  Wallet,
 } from 'lucide-react';
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { EmptyState } from '../components/EmptyState';
 import { StatCard } from '../components/StatCard';
 import { TransactionListItem } from '../components/TransactionListItem';
@@ -91,8 +91,7 @@ const calculateBudget = (
 
 export function HomeScreen({ categories, paymentMethods, transactions, budgetSettings, onShowHistory }: HomeScreenProps) {
   const currentMonth = currentMonthKey();
-  const [activeDetail, setActiveDetail] = useState<HomeDetailKey>('expense');
-  const detailRef = useRef<HTMLElement | null>(null);
+  const [activeDetail, setActiveDetail] = useState<HomeDetailKey | null>(null);
 
   const summary = useMemo(() => {
     const monthTransactions = transactions.filter((transaction) => transaction.transaction_date.startsWith(currentMonth));
@@ -213,30 +212,84 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
     },
   ];
 
-  const activeDetailCard = detailCards.find((card) => card.key === activeDetail) ?? detailCards[1];
-  const monthlyActiveTransactions = summary.details[activeDetail] ?? [];
-  const fallbackActiveTransactions = summary.allDetails[activeDetail] ?? [];
+  const activeDetailCard = activeDetail ? detailCards.find((card) => card.key === activeDetail) ?? null : null;
+  const monthlyActiveTransactions = activeDetail ? summary.details[activeDetail] ?? [] : [];
+  const fallbackActiveTransactions = activeDetail ? summary.allDetails[activeDetail] ?? [] : [];
   const activeTransactions = monthlyActiveTransactions.length > 0 ? monthlyActiveTransactions : fallbackActiveTransactions;
   const isShowingMonthlyDetail = monthlyActiveTransactions.length > 0 || fallbackActiveTransactions.length === 0;
   const detailScopeLabel = isShowingMonthlyDetail ? `${monthLabel(currentMonth)} 내역` : '최근 전체 내역';
+  const monthlyBudgetRate =
+    summary.monthlyBudget.available > 0
+      ? Math.min(100, Math.max(0, (summary.monthlyBudget.spent / summary.monthlyBudget.available) * 100))
+      : 0;
 
   const selectDetail = (key: HomeDetailKey) => {
     setActiveDetail(key);
-    window.setTimeout(() => {
-      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
   };
+
+  if (activeDetail && activeDetailCard) {
+    return (
+      <div className="space-y-4">
+        <button
+          type="button"
+          onClick={() => setActiveDetail(null)}
+          className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-black text-navy shadow-soft active:bg-slate-100"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          홈으로 돌아가기
+        </button>
+
+        <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-bold text-blue-100">{detailScopeLabel}</p>
+              <h2 className="mt-2 text-2xl font-black tracking-normal">{activeDetailCard.label}</h2>
+              <p className="mt-2 break-words text-3xl font-black tracking-normal">
+                {currencyFormatter.format(activeDetailCard.value)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/10 p-3 text-honey">{activeDetailCard.icon}</div>
+          </div>
+          <p className="mt-4 text-sm font-bold text-blue-100">{activeTransactions.length}건의 거래가 있습니다.</p>
+        </section>
+
+        {activeTransactions.length > 0 ? (
+          <section className="space-y-3">
+            {activeTransactions.map((transaction) => (
+              <TransactionListItem
+                key={transaction.id}
+                transaction={transaction}
+                categories={categories}
+                paymentMethods={paymentMethods}
+              />
+            ))}
+          </section>
+        ) : (
+          <EmptyState icon={<ListChecks className="h-6 w-6" />} title="표시할 내역이 없습니다" />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
       <section className="rounded-lg bg-navy p-5 text-white shadow-soft">
-        <p className="text-sm font-bold text-blue-100">{monthLabel(currentMonth)}</p>
-        <div className="mt-3 flex items-end justify-between gap-4">
+        <p className="text-sm font-bold text-blue-100">{monthLabel(currentMonth)} 공동생활비</p>
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-blue-100">이번 달 잔액</p>
-            <p className="mt-1 break-words text-3xl font-black tracking-normal">{currencyFormatter.format(summary.balance)}</p>
+            <p className="text-sm font-semibold text-blue-100">월간 남은 한도</p>
+            <p className={`mt-1 break-words text-3xl font-black tracking-normal ${summary.monthlyBudget.remaining < 0 ? 'text-honey' : ''}`}>
+              {currencyFormatter.format(summary.monthlyBudget.remaining)}
+            </p>
+            <p className="mt-2 text-xs font-bold text-blue-100">
+              한도 {currencyFormatter.format(summary.monthlyBudget.amount)} · 사용{' '}
+              {currencyFormatter.format(summary.monthlyBudget.spent)}
+            </p>
           </div>
-          <Wallet className="h-10 w-10 text-honey" aria-hidden />
+          <Users className="h-10 w-10 text-honey" aria-hidden />
+        </div>
+        <div className="mt-4 h-2 rounded-full bg-white/15">
+          <div className="h-2 rounded-full bg-honey" style={{ width: `${monthlyBudgetRate}%` }} />
         </div>
       </section>
 
@@ -248,48 +301,9 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
             value={card.value}
             tone={card.tone}
             icon={card.icon}
-            active={activeDetail === card.key}
             onClick={() => selectDetail(card.key)}
           />
         ))}
-      </section>
-
-      <section ref={detailRef} className="scroll-mt-24 space-y-3 rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-black text-ocean">{detailScopeLabel}</p>
-            <h2 className="mt-1 text-lg font-black text-ink">{activeDetailCard.label} 내역</h2>
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-xs font-bold text-slate-500">{activeTransactions.length}건</p>
-            <button type="button" onClick={onShowHistory} className="mt-1 rounded-lg px-3 py-2 text-sm font-black text-ocean">
-              전체
-            </button>
-          </div>
-        </div>
-        {activeTransactions.length > 0 ? (
-          <div className="space-y-3">
-            {activeTransactions.slice(0, 8).map((transaction) => (
-              <TransactionListItem
-                key={transaction.id}
-                transaction={transaction}
-                categories={categories}
-                paymentMethods={paymentMethods}
-              />
-            ))}
-            {activeTransactions.length > 8 ? (
-              <button
-                type="button"
-                onClick={onShowHistory}
-                className="w-full rounded-lg bg-skywash px-4 py-3 text-sm font-black text-ocean active:bg-blue-100"
-              >
-                {activeTransactions.length - 8}건 더 보기
-              </button>
-            ) : null}
-          </div>
-        ) : (
-          <EmptyState icon={<ListChecks className="h-6 w-6" />} title="이번 달 내역이 없습니다" />
-        )}
       </section>
 
       <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
