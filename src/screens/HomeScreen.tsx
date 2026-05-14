@@ -27,10 +27,16 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
       .filter((transaction) => transaction.type === 'expense')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const mindaniExpense = monthTransactions
-      .filter((transaction) => transaction.type === 'expense' && transaction.author_name === '민다니')
+      .filter(
+        (transaction) =>
+          transaction.type === 'expense' && transaction.author_name === '민다니' && !transaction.is_shared,
+      )
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const jjimiExpense = monthTransactions
-      .filter((transaction) => transaction.type === 'expense' && transaction.author_name === '찌미찌미')
+      .filter(
+        (transaction) =>
+          transaction.type === 'expense' && transaction.author_name === '찌미찌미' && !transaction.is_shared,
+      )
       .reduce((sum, transaction) => sum + transaction.amount, 0);
     const sharedExpense = monthTransactions
       .filter((transaction) => transaction.type === 'expense' && transaction.is_shared)
@@ -61,7 +67,10 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
       sharedExpense,
       catExpense,
       topCategories,
-      recent: [...transactions].slice(0, 5),
+      recent: transactions.filter((transaction) => !transaction.is_shared).slice(0, 5),
+      sharedRecent: monthTransactions
+        .filter((transaction) => transaction.type === 'expense' && transaction.is_shared)
+        .slice(0, 5),
     };
   }, [categories, currentMonth, transactions]);
 
@@ -88,6 +97,25 @@ export function HomeScreen({ categories, paymentMethods, transactions, onShowHis
       <section className="grid grid-cols-2 gap-3">
         <StatCard label="공동생활비" value={summary.sharedExpense} tone="mint" icon={<Users className="h-5 w-5" />} />
         <StatCard label="고양이 지출" value={summary.catExpense} tone="plain" icon={<Cat className="h-5 w-5" />} />
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black text-ink">공동생활비 목록</h2>
+          <span className="text-sm font-bold text-slate-500">{summary.sharedRecent.length}건</span>
+        </div>
+        {summary.sharedRecent.length > 0 ? (
+          summary.sharedRecent.map((transaction) => (
+            <TransactionListItem
+              key={transaction.id}
+              transaction={transaction}
+              categories={categories}
+              paymentMethods={paymentMethods}
+            />
+          ))
+        ) : (
+          <EmptyState icon={<Users className="h-6 w-6" />} title="이번 달 공동생활비가 없습니다" />
+        )}
       </section>
 
       <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">

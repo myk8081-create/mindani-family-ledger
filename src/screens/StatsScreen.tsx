@@ -66,10 +66,10 @@ export function StatsScreen({ categories, transactions }: StatsScreenProps) {
       {
         name: '작성자',
         민다니: currentExpense
-          .filter((transaction) => transaction.author_name === '민다니')
+          .filter((transaction) => transaction.author_name === '민다니' && !transaction.is_shared)
           .reduce((sum, transaction) => sum + transaction.amount, 0),
         찌미찌미: currentExpense
-          .filter((transaction) => transaction.author_name === '찌미찌미')
+          .filter((transaction) => transaction.author_name === '찌미찌미' && !transaction.is_shared)
           .reduce((sum, transaction) => sum + transaction.amount, 0),
       },
     ];
