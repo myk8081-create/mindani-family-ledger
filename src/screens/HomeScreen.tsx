@@ -10,7 +10,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { EmptyState } from '../components/EmptyState';
 import { StatCard } from '../components/StatCard';
 import { TransactionListItem } from '../components/TransactionListItem';
@@ -92,45 +92,54 @@ const calculateBudget = (
 export function HomeScreen({ categories, paymentMethods, transactions, budgetSettings, onShowHistory }: HomeScreenProps) {
   const currentMonth = currentMonthKey();
   const [activeDetail, setActiveDetail] = useState<HomeDetailKey>('expense');
+  const detailRef = useRef<HTMLElement | null>(null);
 
   const summary = useMemo(() => {
     const monthTransactions = transactions.filter((transaction) => transaction.transaction_date.startsWith(currentMonth));
-    const incomeTransactions = monthTransactions.filter((transaction) => transaction.type === 'income');
-    const expenseTransactions = monthTransactions.filter((transaction) => transaction.type === 'expense');
-    const mindaniTransactions = expenseTransactions.filter(
-      (transaction) =>
-        transaction.author_name === '민다니' &&
-        !transaction.is_shared &&
-        !transaction.is_fixed &&
-        !isCatTransaction(transaction, categories),
-    );
-    const jjimiTransactions = expenseTransactions.filter(
-      (transaction) =>
-        transaction.author_name === '찌미찌미' &&
-        !transaction.is_shared &&
-        !transaction.is_fixed &&
-        !isCatTransaction(transaction, categories),
-    );
-    const sharedTransactions = expenseTransactions.filter((transaction) => transaction.is_shared);
-    const fixedTransactions = expenseTransactions.filter((transaction) => transaction.is_fixed);
-    const catTransactions = expenseTransactions.filter((transaction) => isCatTransaction(transaction, categories));
-    const cashLikeTransactions = expenseTransactions.filter((transaction) => isCashLikeTransaction(transaction, paymentMethods));
-    const creditCardTransactions = expenseTransactions.filter((transaction) =>
-      isCreditCardTransaction(transaction, paymentMethods),
-    );
+    const buildDetails = (sourceTransactions: Transaction[]) => {
+      const incomeTransactions = sourceTransactions.filter((transaction) => transaction.type === 'income');
+      const expenseTransactions = sourceTransactions.filter((transaction) => transaction.type === 'expense');
+      const mindaniTransactions = expenseTransactions.filter(
+        (transaction) =>
+          transaction.author_name === '민다니' &&
+          !transaction.is_shared &&
+          !transaction.is_fixed &&
+          !isCatTransaction(transaction, categories),
+      );
+      const jjimiTransactions = expenseTransactions.filter(
+        (transaction) =>
+          transaction.author_name === '찌미찌미' &&
+          !transaction.is_shared &&
+          !transaction.is_fixed &&
+          !isCatTransaction(transaction, categories),
+      );
+      return {
+        income: incomeTransactions,
+        expense: expenseTransactions,
+        mindani: mindaniTransactions,
+        jjimi: jjimiTransactions,
+        shared: expenseTransactions.filter((transaction) => transaction.is_shared),
+        fixed: expenseTransactions.filter((transaction) => transaction.is_fixed),
+        cat: expenseTransactions.filter((transaction) => isCatTransaction(transaction, categories)),
+        cash: expenseTransactions.filter((transaction) => isCashLikeTransaction(transaction, paymentMethods)),
+        credit: expenseTransactions.filter((transaction) => isCreditCardTransaction(transaction, paymentMethods)),
+      } satisfies Record<HomeDetailKey, Transaction[]>;
+    };
 
-    const income = sumTransactions(incomeTransactions);
-    const expense = sumTransactions(expenseTransactions);
-    const mindaniExpense = sumTransactions(mindaniTransactions);
-    const jjimiExpense = sumTransactions(jjimiTransactions);
-    const sharedExpense = sumTransactions(sharedTransactions);
-    const fixedExpense = sumTransactions(fixedTransactions);
-    const catExpense = sumTransactions(catTransactions);
-    const cashLikeExpense = sumTransactions(cashLikeTransactions);
-    const creditCardExpense = sumTransactions(creditCardTransactions);
+    const details = buildDetails(monthTransactions);
+    const allDetails = buildDetails(transactions);
+    const income = sumTransactions(details.income);
+    const expense = sumTransactions(details.expense);
+    const mindaniExpense = sumTransactions(details.mindani);
+    const jjimiExpense = sumTransactions(details.jjimi);
+    const sharedExpense = sumTransactions(details.shared);
+    const fixedExpense = sumTransactions(details.fixed);
+    const catExpense = sumTransactions(details.cat);
+    const cashLikeExpense = sumTransactions(details.cash);
+    const creditCardExpense = sumTransactions(details.credit);
 
     const categoryMap = new Map<string, number>();
-    expenseTransactions.forEach((transaction) => {
+    details.expense.forEach((transaction) => {
       const name = categoryName(categories, transaction.category_id);
       categoryMap.set(name, (categoryMap.get(name) ?? 0) + transaction.amount);
     });
@@ -154,17 +163,8 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
       topCategories,
       weeklyBudget: calculateBudget(budgetSettings, transactions, 'shared_weekly'),
       monthlyBudget: calculateBudget(budgetSettings, transactions, 'shared_monthly'),
-      details: {
-        income: incomeTransactions,
-        expense: expenseTransactions,
-        mindani: mindaniTransactions,
-        jjimi: jjimiTransactions,
-        shared: sharedTransactions,
-        fixed: fixedTransactions,
-        cat: catTransactions,
-        cash: cashLikeTransactions,
-        credit: creditCardTransactions,
-      } satisfies Record<HomeDetailKey, Transaction[]>,
+      details,
+      allDetails,
       recent: transactions
         .filter(
           (transaction) =>
@@ -214,7 +214,18 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
   ];
 
   const activeDetailCard = detailCards.find((card) => card.key === activeDetail) ?? detailCards[1];
-  const activeTransactions = summary.details[activeDetail] ?? [];
+  const monthlyActiveTransactions = summary.details[activeDetail] ?? [];
+  const fallbackActiveTransactions = summary.allDetails[activeDetail] ?? [];
+  const activeTransactions = monthlyActiveTransactions.length > 0 ? monthlyActiveTransactions : fallbackActiveTransactions;
+  const isShowingMonthlyDetail = monthlyActiveTransactions.length > 0 || fallbackActiveTransactions.length === 0;
+  const detailScopeLabel = isShowingMonthlyDetail ? `${monthLabel(currentMonth)} 내역` : '최근 전체 내역';
+
+  const selectDetail = (key: HomeDetailKey) => {
+    setActiveDetail(key);
+    window.setTimeout(() => {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  };
 
   return (
     <div className="space-y-5">
@@ -238,20 +249,23 @@ export function HomeScreen({ categories, paymentMethods, transactions, budgetSet
             tone={card.tone}
             icon={card.icon}
             active={activeDetail === card.key}
-            onClick={() => setActiveDetail(card.key)}
+            onClick={() => selectDetail(card.key)}
           />
         ))}
       </section>
 
-      <section className="space-y-3 rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+      <section ref={detailRef} className="scroll-mt-24 space-y-3 rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black text-ocean">선택한 카드</p>
+            <p className="text-xs font-black text-ocean">{detailScopeLabel}</p>
             <h2 className="mt-1 text-lg font-black text-ink">{activeDetailCard.label} 내역</h2>
           </div>
-          <button type="button" onClick={onShowHistory} className="rounded-lg px-3 py-2 text-sm font-black text-ocean">
-            전체
-          </button>
+          <div className="shrink-0 text-right">
+            <p className="text-xs font-bold text-slate-500">{activeTransactions.length}건</p>
+            <button type="button" onClick={onShowHistory} className="mt-1 rounded-lg px-3 py-2 text-sm font-black text-ocean">
+              전체
+            </button>
+          </div>
         </div>
         {activeTransactions.length > 0 ? (
           <div className="space-y-3">
