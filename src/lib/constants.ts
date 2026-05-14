@@ -40,6 +40,7 @@ export const emptyTransactionForm = (authorName: AuthorName): TransactionFormVal
   memo: '',
   is_fixed: false,
   is_shared: false,
+  split_months: '1',
 });
 
 export const currencyFormatter = new Intl.NumberFormat('ko-KR', {

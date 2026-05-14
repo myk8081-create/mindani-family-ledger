@@ -32,6 +32,29 @@ export const addMonths = (month: string, delta: number) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
+export const addDays = (date: string, delta: number) => {
+  const value = new Date(`${date}T00:00:00`);
+  value.setDate(value.getDate() + delta);
+  return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+};
+
+export const addMonthsToDate = (date: string, delta: number) => {
+  const [year, monthNumber, day] = date.split('-').map(Number);
+  const target = new Date(year, monthNumber - 1 + delta, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, lastDay));
+  return new Date(target.getTime() - target.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+};
+
+export const weekStartISO = (date: string) => {
+  const value = new Date(`${date}T00:00:00`);
+  const day = value.getDay() || 7;
+  value.setDate(value.getDate() - day + 1);
+  return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+};
+
+export const weekEndISO = (date: string) => addDays(weekStartISO(date), 6);
+
 export const recentMonthKeys = (count: number, base = currentMonthKey()) => {
   const months: string[] = [];
   for (let index = count - 1; index >= 0; index -= 1) {

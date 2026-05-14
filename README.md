@@ -9,7 +9,9 @@
 - 가족 구성원 `민다니`, `찌미찌미`
 - 같은 가족 그룹의 거래, 카테고리, 결제수단, 반복 지출만 공유
 - 거래 입력, 수정, 삭제, 월별/작성자별/카테고리별/수입·지출 필터, 검색
-- 공동생활비/고정비 체크, 개인 작성자 합계 제외, 홈 별도 목록 확인
+- 공동생활비/고정비/고양이 지출을 개인 작성자 합계에서 제외하고 홈 별도 목록 확인
+- 공동생활비 주간/월간 한도, 이월, 남은 금액 표시
+- 카드 사용비 별도 합계/목록, 분할개월 지출 입력
 - Supabase Realtime 기반 실시간 반영
 - 홈 대시보드와 Recharts 통계
 - 반복 지출 등록 및 이번 달 거래 생성
@@ -41,7 +43,10 @@ npm run dev
 
 Supabase SQL Editor에서 [supabase/schema.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/schema.sql)의 전체 내용을 실행합니다.
 
-이미 기존 SQL을 적용한 프로젝트에서 공동생활비 기능만 추가하려면 [supabase/add-shared-expense.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/add-shared-expense.sql)을 한 번 실행해도 됩니다.
+이미 기존 SQL을 적용한 프로젝트에서 공동생활비/예산/분할 기능만 추가하려면 아래 순서로 실행하면 됩니다.
+
+1. [supabase/add-shared-expense.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/add-shared-expense.sql)
+2. [supabase/add-budgets-and-splits.sql](/Users/minyoungki/Documents/Codex/2026-05-14/pwa-pc-react-typescript-vite-tailwind/supabase/add-budgets-and-splits.sql)
 
 이 SQL에는 다음이 포함되어 있습니다.
 
@@ -102,8 +107,10 @@ VITE_DEFAULT_FAMILY_INVITE_CODE=MINDANI-FAMILY-2026
 2. 로그인 후 본인 이름을 선택해 `민다니 패밀리`에 연결합니다.
 3. 하단 탭에서 홈, 입력, 내역, 통계, 설정을 사용합니다.
 4. 둘이 함께 쓴 돈은 거래 입력에서 `공동생활비`를 체크합니다.
-5. 반복 지출은 설정 > 반복 지출 관리에서 등록하고 `이번 달 생성`으로 거래에 반영합니다.
-6. 백업은 설정에서 CSV 또는 JSON으로 내려받고, JSON 파일로 복원할 수 있습니다.
+5. 여러 달에 나눠 반영할 구매는 거래 입력에서 `분할개월`을 입력합니다.
+6. 공동생활비 한도는 설정 > 공동생활비 한도에서 주간/월간 금액과 이월 여부를 저장합니다.
+7. 반복 지출은 설정 > 반복 지출 관리에서 등록하고 `이번 달 생성`으로 거래에 반영합니다.
+8. 백업은 설정에서 CSV 또는 JSON으로 내려받고, JSON 파일로 복원할 수 있습니다.
 
 ## 개발 명령어
 

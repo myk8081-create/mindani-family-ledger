@@ -184,26 +184,39 @@ export function TransactionForm({
       </label>
 
       {values.type === 'expense' ? (
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
-            <span>공동생활비</span>
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+              <span>공동생활비</span>
+              <input
+                type="checkbox"
+                checked={values.is_shared}
+                onChange={(event) => setValue('is_shared', event.target.checked)}
+                className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+              />
+            </label>
+            <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+              <span>고정지출</span>
+              <input
+                type="checkbox"
+                checked={values.is_fixed}
+                onChange={(event) => setValue('is_fixed', event.target.checked)}
+                className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+              />
+            </label>
+          </div>
+          <label className="block">
+            <span className="text-sm font-bold text-slate-600">분할개월</span>
             <input
-              type="checkbox"
-              checked={values.is_shared}
-              onChange={(event) => setValue('is_shared', event.target.checked)}
-              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+              type="number"
+              min={1}
+              max={24}
+              value={values.split_months}
+              onChange={(event) => setValue('split_months', event.target.value)}
+              className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 font-bold text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
             />
           </label>
-          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
-            <span>고정지출</span>
-            <input
-              type="checkbox"
-              checked={values.is_fixed}
-              onChange={(event) => setValue('is_fixed', event.target.checked)}
-              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
-            />
-          </label>
-        </div>
+        </>
       ) : null}
 
       {error ? <p className="rounded-lg bg-warm/10 px-3 py-2 text-sm font-bold text-warm">{error}</p> : null}

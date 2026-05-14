@@ -94,6 +94,7 @@ export default function App() {
             categories={ledger.categories}
             paymentMethods={ledger.paymentMethods}
             transactions={ledger.transactions}
+            budgetSettings={ledger.budgetSettings}
             onShowHistory={() => setScreen('history')}
           />
         ) : null}
@@ -125,9 +126,11 @@ export default function App() {
             categories={ledger.categories}
             paymentMethods={ledger.paymentMethods}
             transactions={ledger.transactions}
+            budgetSettings={ledger.budgetSettings}
             buildBackup={ledger.buildBackup}
             restoreBackup={ledger.restoreBackup}
             resetData={ledger.resetData}
+            saveBudgetSettings={ledger.saveBudgetSettings}
             onOpenRecurring={() => setScreen('recurring')}
             onSignOut={auth.signOut}
           />

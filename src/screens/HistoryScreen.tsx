@@ -26,6 +26,7 @@ const formFromTransaction = (transaction: Transaction): TransactionFormValues =>
   memo: transaction.memo ?? '',
   is_fixed: transaction.is_fixed,
   is_shared: transaction.is_shared,
+  split_months: String(transaction.split_total ?? 1),
 });
 
 export function HistoryScreen({ categories, paymentMethods, transactions, onSave, onDelete }: HistoryScreenProps) {

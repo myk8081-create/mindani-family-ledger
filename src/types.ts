@@ -4,6 +4,7 @@ export type TransactionType = 'income' | 'expense';
 export type AuthorName = '민다니' | '찌미찌미';
 export type AppScreen = 'home' | 'entry' | 'history' | 'stats' | 'settings' | 'recurring';
 export type SyncStatus = 'online' | 'offline' | 'syncing';
+export type BudgetKey = 'shared_weekly' | 'shared_monthly';
 
 export interface Profile {
   id: string;
@@ -69,6 +70,10 @@ export interface Transaction {
   memo: string | null;
   is_fixed: boolean;
   is_shared: boolean;
+  split_group_id: string | null;
+  split_index: number;
+  split_total: number;
+  original_amount: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -107,6 +112,7 @@ export interface TransactionFormValues {
   memo: string;
   is_fixed: boolean;
   is_shared: boolean;
+  split_months: string;
 }
 
 export interface RecurringFormValues {
@@ -122,6 +128,24 @@ export interface RecurringFormValues {
   is_shared: boolean;
 }
 
+export interface BudgetSetting {
+  id: string;
+  family_group_id: string;
+  budget_key: BudgetKey;
+  amount: number;
+  carryover_enabled: boolean;
+  carryover_start_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BudgetSettingsFormValues {
+  weekly_amount: string;
+  weekly_carryover_enabled: boolean;
+  monthly_amount: string;
+  monthly_carryover_enabled: boolean;
+}
+
 export interface LedgerBackup {
   app: 'mindani-family-ledger';
   exported_at: string;
@@ -130,6 +154,7 @@ export interface LedgerBackup {
   recurring_transactions: Array<
     RecurringTransaction & { category_name?: string; subcategory_name?: string; payment_method_name?: string }
   >;
+  budget_settings: BudgetSetting[];
   categories: Category[];
   payment_methods: PaymentMethod[];
 }

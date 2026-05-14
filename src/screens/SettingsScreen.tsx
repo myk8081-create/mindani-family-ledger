@@ -1,17 +1,27 @@
 import { Download, LogOut, Repeat, RotateCcw, Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FAMILY_GROUP_NAME } from '../lib/constants';
 import { categoryName, paymentMethodName } from '../lib/ledger';
-import type { Category, FamilyGroup, LedgerBackup, PaymentMethod, Transaction } from '../types';
+import type {
+  BudgetSetting,
+  BudgetSettingsFormValues,
+  Category,
+  FamilyGroup,
+  LedgerBackup,
+  PaymentMethod,
+  Transaction,
+} from '../types';
 
 interface SettingsScreenProps {
   familyGroup: FamilyGroup | null;
   categories: Category[];
   paymentMethods: PaymentMethod[];
   transactions: Transaction[];
+  budgetSettings: BudgetSetting[];
   buildBackup: () => LedgerBackup;
   restoreBackup: (backup: LedgerBackup) => Promise<void>;
   resetData: () => Promise<void>;
+  saveBudgetSettings: (values: BudgetSettingsFormValues) => Promise<void>;
   onOpenRecurring: () => void;
   onSignOut: () => Promise<void> | void;
 }
@@ -67,9 +77,11 @@ export function SettingsScreen({
   categories,
   paymentMethods,
   transactions,
+  budgetSettings,
   buildBackup,
   restoreBackup,
   resetData,
+  saveBudgetSettings,
   onOpenRecurring,
   onSignOut,
 }: SettingsScreenProps) {
@@ -77,6 +89,23 @@ export function SettingsScreen({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [budgetValues, setBudgetValues] = useState<BudgetSettingsFormValues>({
+    weekly_amount: '',
+    weekly_carryover_enabled: false,
+    monthly_amount: '',
+    monthly_carryover_enabled: false,
+  });
+
+  useEffect(() => {
+    const weekly = budgetSettings.find((setting) => setting.budget_key === 'shared_weekly');
+    const monthly = budgetSettings.find((setting) => setting.budget_key === 'shared_monthly');
+    setBudgetValues({
+      weekly_amount: weekly?.amount ? String(weekly.amount) : '',
+      weekly_carryover_enabled: weekly?.carryover_enabled ?? false,
+      monthly_amount: monthly?.amount ? String(monthly.amount) : '',
+      monthly_carryover_enabled: monthly?.carryover_enabled ?? false,
+    });
+  }, [budgetSettings]);
 
   const exportCsv = () => {
     const csv = buildCsv(transactions, categories, paymentMethods);
@@ -124,6 +153,20 @@ export function SettingsScreen({
     }
   };
 
+  const handleBudgetSave = async () => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await saveBudgetSettings(budgetValues);
+      setMessage('공동생활비 한도가 저장되었습니다.');
+    } catch (budgetError) {
+      setError(budgetError instanceof Error ? budgetError.message : '한도를 저장하지 못했습니다.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
@@ -144,6 +187,74 @@ export function SettingsScreen({
         >
           <Repeat className="h-5 w-5" aria-hidden />
           반복 지출 관리
+        </button>
+      </section>
+
+      <section className="rounded-lg border border-slate-100 bg-white p-4 shadow-soft">
+        <h2 className="text-lg font-black text-ink">공동생활비 한도</h2>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-sm font-bold text-slate-600">주간 한도</span>
+            <input
+              value={budgetValues.weekly_amount}
+              onChange={(event) =>
+                setBudgetValues((previous) => ({
+                  ...previous,
+                  weekly_amount: event.target.value.replace(/[^\d,]/g, ''),
+                }))
+              }
+              inputMode="numeric"
+              placeholder="0"
+              className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-bold text-slate-600">월간 한도</span>
+            <input
+              value={budgetValues.monthly_amount}
+              onChange={(event) =>
+                setBudgetValues((previous) => ({
+                  ...previous,
+                  monthly_amount: event.target.value.replace(/[^\d,]/g, ''),
+                }))
+              }
+              inputMode="numeric"
+              placeholder="0"
+              className="mt-2 h-12 w-full rounded-lg border border-slate-200 bg-white px-3 text-right font-bold outline-none focus:border-ocean focus:ring-4 focus:ring-blue-100"
+            />
+          </label>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+            <span>주간 이월</span>
+            <input
+              type="checkbox"
+              checked={budgetValues.weekly_carryover_enabled}
+              onChange={(event) =>
+                setBudgetValues((previous) => ({ ...previous, weekly_carryover_enabled: event.target.checked }))
+              }
+              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+            />
+          </label>
+          <label className="flex min-h-12 items-center justify-between rounded-lg border border-slate-200 bg-white px-4 font-bold text-ink">
+            <span>월간 이월</span>
+            <input
+              type="checkbox"
+              checked={budgetValues.monthly_carryover_enabled}
+              onChange={(event) =>
+                setBudgetValues((previous) => ({ ...previous, monthly_carryover_enabled: event.target.checked }))
+              }
+              className="h-5 w-5 rounded border-slate-300 text-ocean focus:ring-ocean"
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleBudgetSave()}
+          disabled={busy}
+          className="mt-3 min-h-12 w-full rounded-lg bg-navy px-4 font-black text-white shadow-soft disabled:opacity-60"
+        >
+          한도 저장
         </button>
       </section>
 

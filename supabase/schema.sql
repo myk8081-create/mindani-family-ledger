@@ -86,6 +86,10 @@ create table if not exists public.transactions (
   memo text,
   is_fixed boolean not null default false,
   is_shared boolean not null default false,
+  split_group_id uuid,
+  split_index integer not null default 1 check (split_index >= 1),
+  split_total integer not null default 1 check (split_total >= 1),
+  original_amount numeric(14, 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
@@ -122,8 +126,26 @@ create index if not exists recurring_transactions_family_idx
 alter table if exists public.transactions
   add column if not exists is_shared boolean not null default false;
 
+alter table if exists public.transactions
+  add column if not exists split_group_id uuid,
+  add column if not exists split_index integer not null default 1,
+  add column if not exists split_total integer not null default 1,
+  add column if not exists original_amount numeric(14, 0);
+
 alter table if exists public.recurring_transactions
   add column if not exists is_shared boolean not null default false;
+
+create table if not exists public.budget_settings (
+  id uuid primary key default gen_random_uuid(),
+  family_group_id uuid not null references public.family_groups(id) on delete cascade,
+  budget_key text not null check (budget_key in ('shared_weekly', 'shared_monthly')),
+  amount numeric(14, 0) not null default 0 check (amount >= 0),
+  carryover_enabled boolean not null default false,
+  carryover_start_date date,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (family_group_id, budget_key)
+);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -158,6 +180,11 @@ create trigger set_payment_methods_updated_at
 drop trigger if exists set_transactions_updated_at on public.transactions;
 create trigger set_transactions_updated_at
   before update on public.transactions
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_budget_settings_updated_at on public.budget_settings;
+create trigger set_budget_settings_updated_at
+  before update on public.budget_settings
   for each row execute function public.set_updated_at();
 
 drop trigger if exists set_recurring_transactions_updated_at on public.recurring_transactions;
@@ -354,6 +381,7 @@ alter table public.categories enable row level security;
 alter table public.payment_methods enable row level security;
 alter table public.transactions enable row level security;
 alter table public.recurring_transactions enable row level security;
+alter table public.budget_settings enable row level security;
 
 drop policy if exists "profiles_select_family" on public.profiles;
 create policy "profiles_select_family"
@@ -451,6 +479,22 @@ create policy "recurring_transactions_update_family"
   using (public.is_family_member(family_group_id))
   with check (public.is_family_member(family_group_id));
 
+drop policy if exists "budget_settings_select_family" on public.budget_settings;
+create policy "budget_settings_select_family"
+  on public.budget_settings for select
+  using (public.is_family_member(family_group_id));
+
+drop policy if exists "budget_settings_insert_family" on public.budget_settings;
+create policy "budget_settings_insert_family"
+  on public.budget_settings for insert
+  with check (public.is_family_member(family_group_id));
+
+drop policy if exists "budget_settings_update_family" on public.budget_settings;
+create policy "budget_settings_update_family"
+  on public.budget_settings for update
+  using (public.is_family_member(family_group_id))
+  with check (public.is_family_member(family_group_id));
+
 grant usage on schema public to anon, authenticated;
 grant select, insert, update on public.profiles to authenticated;
 grant select, update on public.family_groups to authenticated;
@@ -459,6 +503,7 @@ grant select, insert, update on public.categories to authenticated;
 grant select, insert, update on public.payment_methods to authenticated;
 grant select, insert, update on public.transactions to authenticated;
 grant select, insert, update on public.recurring_transactions to authenticated;
+grant select, insert, update on public.budget_settings to authenticated;
 grant execute on function public.claim_default_family_member(text, text) to authenticated;
 grant execute on function public.seed_family_defaults(uuid) to authenticated;
 
@@ -489,6 +534,14 @@ end $$;
 do $$
 begin
   alter publication supabase_realtime add table public.payment_methods;
+exception
+  when duplicate_object then null;
+  when undefined_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.budget_settings;
 exception
   when duplicate_object then null;
   when undefined_object then null;

@@ -18,6 +18,11 @@ export const categoryName = (categories: Category[], id: string | null | undefin
 export const paymentMethodName = (methods: PaymentMethod[], id: string | null | undefined) =>
   findPaymentMethod(methods, id)?.name ?? '기타';
 
+export const isCardTransaction = (transaction: Transaction, methods: PaymentMethod[]) => {
+  const method = findPaymentMethod(methods, transaction.payment_method_id);
+  return transaction.type === 'expense' && Boolean(method?.name.includes('카드'));
+};
+
 export const childCategories = (categories: Category[], parentId: string | null | undefined) =>
   activeOnly(categories)
     .filter((category) => category.parent_id === parentId)

@@ -48,6 +48,7 @@ export function TransactionListItem({
             {method ? ` · ${method}` : ''}
             {transaction.is_shared ? ' · 공동' : ''}
             {transaction.is_fixed ? ' · 고정' : ''}
+            {transaction.split_total > 1 ? ` · 분할 ${transaction.split_index}/${transaction.split_total}` : ''}
             {transaction.memo ? ` · ${transaction.memo}` : ''}
           </p>
         </div>

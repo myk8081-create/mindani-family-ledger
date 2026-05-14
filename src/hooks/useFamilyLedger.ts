@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { DEFAULT_INVITE_CODE } from '../lib/constants';
-import { currentMonthKey, dateForMonthDay } from '../lib/date';
+import { addMonthsToDate, currentMonthKey, dateForMonthDay } from '../lib/date';
 import {
   categoryName,
   findCategory,
@@ -13,6 +13,9 @@ import { readJson, removeJson, writeJson } from '../lib/storage';
 import { supabase } from '../lib/supabase';
 import type {
   AuthorName,
+  BudgetKey,
+  BudgetSetting,
+  BudgetSettingsFormValues,
   Category,
   FamilyGroup,
   FamilyMember,
@@ -45,6 +48,7 @@ interface CacheSnapshot {
   paymentMethods: PaymentMethod[];
   transactions: Transaction[];
   recurringTransactions: RecurringTransaction[];
+  budgetSettings: BudgetSetting[];
 }
 
 const emptySnapshot: CacheSnapshot = {
@@ -55,6 +59,7 @@ const emptySnapshot: CacheSnapshot = {
   paymentMethods: [],
   transactions: [],
   recurringTransactions: [],
+  budgetSettings: [],
 };
 
 const isBrowserOnline = () => (typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -87,9 +92,24 @@ const rowToTransaction = (row: Record<string, unknown>): Transaction => ({
   memo: row.memo ? String(row.memo) : null,
   is_fixed: Boolean(row.is_fixed),
   is_shared: Boolean(row.is_shared),
+  split_group_id: row.split_group_id ? String(row.split_group_id) : null,
+  split_index: Number(row.split_index ?? 1),
+  split_total: Number(row.split_total ?? 1),
+  original_amount: row.original_amount ? normalizeAmount(row.original_amount) : null,
   created_at: String(row.created_at),
   updated_at: String(row.updated_at),
   deleted_at: row.deleted_at ? String(row.deleted_at) : null,
+});
+
+const rowToBudgetSetting = (row: Record<string, unknown>): BudgetSetting => ({
+  id: String(row.id),
+  family_group_id: String(row.family_group_id),
+  budget_key: row.budget_key as BudgetKey,
+  amount: normalizeAmount(row.amount),
+  carryover_enabled: Boolean(row.carryover_enabled),
+  carryover_start_date: row.carryover_start_date ? String(row.carryover_start_date) : null,
+  created_at: String(row.created_at),
+  updated_at: String(row.updated_at),
 });
 
 const rowToRecurring = (row: Record<string, unknown>): RecurringTransaction => ({
@@ -122,6 +142,7 @@ export const useFamilyLedger = (user: User | null) => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recurringTransactions, setRecurringTransactions] = useState<RecurringTransaction[]>([]);
+  const [budgetSettings, setBudgetSettings] = useState<BudgetSetting[]>([]);
   const [loading, setLoading] = useState(Boolean(user));
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(isBrowserOnline);
@@ -143,6 +164,7 @@ export const useFamilyLedger = (user: User | null) => {
     setPaymentMethods(snapshot.paymentMethods);
     setTransactions(snapshot.transactions);
     setRecurringTransactions(snapshot.recurringTransactions);
+    setBudgetSettings(snapshot.budgetSettings);
   }, []);
 
   const loadCachedSnapshot = useCallback(() => {
@@ -245,7 +267,7 @@ export const useFamilyLedger = (user: User | null) => {
 
     await supabase.rpc('seed_family_defaults', { target_family_group_id: memberData.family_group_id });
 
-    const [profileResult, familyResult, categoriesResult, paymentResult, transactionResult, recurringResult] =
+    const [profileResult, familyResult, categoriesResult, paymentResult, transactionResult, recurringResult, budgetResult] =
       await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
         supabase.from('family_groups').select('*').eq('id', memberData.family_group_id).single(),
@@ -274,6 +296,11 @@ export const useFamilyLedger = (user: User | null) => {
           .eq('family_group_id', memberData.family_group_id)
           .is('deleted_at', null)
           .order('created_at', { ascending: false }),
+        supabase
+          .from('budget_settings')
+          .select('*')
+          .eq('family_group_id', memberData.family_group_id)
+          .order('budget_key', { ascending: true }),
       ]);
 
     const firstError =
@@ -282,7 +309,8 @@ export const useFamilyLedger = (user: User | null) => {
       categoriesResult.error ||
       paymentResult.error ||
       transactionResult.error ||
-      recurringResult.error;
+      recurringResult.error ||
+      budgetResult.error;
 
     if (firstError) {
       setError(firstError.message);
@@ -298,6 +326,7 @@ export const useFamilyLedger = (user: User | null) => {
       paymentMethods: (paymentResult.data as PaymentMethod[]) ?? [],
       transactions: ((transactionResult.data as Record<string, unknown>[]) ?? []).map(rowToTransaction),
       recurringTransactions: ((recurringResult.data as Record<string, unknown>[]) ?? []).map(rowToRecurring),
+      budgetSettings: ((budgetResult.data as Record<string, unknown>[]) ?? []).map(rowToBudgetSetting),
     };
 
     applySnapshot(snapshot);
@@ -398,6 +427,11 @@ export const useFamilyLedger = (user: User | null) => {
         { event: '*', schema: 'public', table: 'categories', filter: `family_group_id=eq.${familyGroup.id}` },
         () => void refresh(),
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'budget_settings', filter: `family_group_id=eq.${familyGroup.id}` },
+        () => void refresh(),
+      )
       .subscribe();
 
     return () => {
@@ -433,9 +467,10 @@ export const useFamilyLedger = (user: User | null) => {
         paymentMethods,
         transactions: nextTransactions,
         recurringTransactions,
+        budgetSettings,
       });
     },
-    [categories, familyGroup, member, paymentMethods, persistSnapshot, profile, recurringTransactions],
+    [budgetSettings, categories, familyGroup, member, paymentMethods, persistSnapshot, profile, recurringTransactions],
   );
 
   const updateLocalRecurring = useCallback(
@@ -449,9 +484,45 @@ export const useFamilyLedger = (user: User | null) => {
         paymentMethods,
         transactions,
         recurringTransactions: nextRecurring,
+        budgetSettings,
       });
     },
-    [categories, familyGroup, member, paymentMethods, persistSnapshot, profile, transactions],
+    [budgetSettings, categories, familyGroup, member, paymentMethods, persistSnapshot, profile, transactions],
+  );
+
+  const saveBudgetSettings = useCallback(
+    async (values: BudgetSettingsFormValues) => {
+      if (!user || !familyGroup || !supabase || !isBrowserOnline()) {
+        throw new Error('예산 설정은 온라인 상태에서 저장할 수 있습니다.');
+      }
+
+      const weeklyAmount = Math.max(0, parseAmount(values.weekly_amount || '0') || 0);
+      const monthlyAmount = Math.max(0, parseAmount(values.monthly_amount || '0') || 0);
+      const startDate = currentMonthKey() + '-01';
+      const rows = [
+        {
+          family_group_id: familyGroup.id,
+          budget_key: 'shared_weekly' as BudgetKey,
+          amount: weeklyAmount,
+          carryover_enabled: values.weekly_carryover_enabled,
+          carryover_start_date: startDate,
+        },
+        {
+          family_group_id: familyGroup.id,
+          budget_key: 'shared_monthly' as BudgetKey,
+          amount: monthlyAmount,
+          carryover_enabled: values.monthly_carryover_enabled,
+          carryover_start_date: startDate,
+        },
+      ];
+
+      const { error: budgetError } = await supabase
+        .from('budget_settings')
+        .upsert(rows, { onConflict: 'family_group_id,budget_key' });
+      if (budgetError) throw budgetError;
+      await refresh();
+    },
+    [familyGroup, refresh, user],
   );
 
   const saveTransaction = useCallback(
@@ -477,6 +548,40 @@ export const useFamilyLedger = (user: User | null) => {
         deleted_at: null,
       };
 
+      const splitMonths =
+        !editingId && values.type === 'expense'
+          ? Math.min(24, Math.max(1, Number(values.split_months) || 1))
+          : 1;
+
+      const buildSplitPayloads = () => {
+        if (splitMonths <= 1) {
+          return [
+            {
+              ...payload,
+              split_group_id: null,
+              split_index: 1,
+              split_total: 1,
+              original_amount: null,
+            },
+          ];
+        }
+        const splitGroupId = crypto.randomUUID();
+        const baseAmount = Math.floor(amount / splitMonths);
+        const remainder = amount - baseAmount * splitMonths;
+        return Array.from({ length: splitMonths }, (_, index) => ({
+          ...payload,
+          transaction_date: addMonthsToDate(values.transaction_date, index),
+          amount: baseAmount + (index < remainder ? 1 : 0),
+          memo: values.memo.trim()
+            ? `${values.memo.trim()} (${index + 1}/${splitMonths})`
+            : `분할 지출 (${index + 1}/${splitMonths})`,
+          split_group_id: splitGroupId,
+          split_index: index + 1,
+          split_total: splitMonths,
+          original_amount: amount,
+        }));
+      };
+
       if (supabase && isBrowserOnline()) {
         const result = editingId
           ? await supabase
@@ -484,7 +589,7 @@ export const useFamilyLedger = (user: User | null) => {
               .update({ ...payload, updated_at: nowISO() })
               .eq('id', editingId)
               .eq('family_group_id', familyGroup.id)
-          : await supabase.from('transactions').insert(payload);
+          : await supabase.from('transactions').insert(buildSplitPayloads() as Record<string, unknown>[]);
 
         if (result.error) throw result.error;
         await refresh();
@@ -506,15 +611,21 @@ export const useFamilyLedger = (user: User | null) => {
           enqueue({ table: 'transactions', action: 'update', payload: { id: editingId, ...payload } });
         }
       } else {
-        const offlineTransaction: Transaction = {
+        const offlineTransactions: Transaction[] = buildSplitPayloads().map((splitPayload) => ({
           id: `offline-${crypto.randomUUID()}`,
           created_at: timestamp,
           updated_at: timestamp,
           pending: true,
-          ...payload,
-        };
-        updateLocalTransactions([offlineTransaction, ...transactions]);
-        enqueue({ table: 'transactions', action: 'insert', payload: { ...offlineTransaction } as Record<string, unknown> });
+          ...splitPayload,
+        }));
+        updateLocalTransactions([...offlineTransactions, ...transactions]);
+        offlineTransactions.forEach((offlineTransaction) => {
+          enqueue({
+            table: 'transactions',
+            action: 'insert',
+            payload: { ...offlineTransaction } as Record<string, unknown>,
+          });
+        });
       }
       setSyncStatus('offline');
     },
@@ -713,10 +824,11 @@ export const useFamilyLedger = (user: User | null) => {
       family_group: familyGroup,
       transactions: transactionsWithNames,
       recurring_transactions: recurringWithNames,
+      budget_settings: budgetSettings,
       categories,
       payment_methods: paymentMethods,
     };
-  }, [categories, familyGroup, paymentMethods, recurringTransactions, transactions]);
+  }, [budgetSettings, categories, familyGroup, paymentMethods, recurringTransactions, transactions]);
 
   const restoreBackup = useCallback(
     async (backup: LedgerBackup) => {
@@ -769,6 +881,10 @@ export const useFamilyLedger = (user: User | null) => {
             memo: transaction.memo,
             is_fixed: transaction.is_fixed,
             is_shared: transaction.is_shared,
+            split_group_id: transaction.split_group_id,
+            split_index: transaction.split_index ?? 1,
+            split_total: transaction.split_total ?? 1,
+            original_amount: transaction.original_amount,
           };
         })
         .filter((transaction) => transaction.category_id);
@@ -805,6 +921,20 @@ export const useFamilyLedger = (user: User | null) => {
       if (recurringRows.length > 0) {
         const { error: recurringError } = await supabase.from('recurring_transactions').insert(recurringRows);
         if (recurringError) throw recurringError;
+      }
+
+      if (backup.budget_settings?.length > 0) {
+        const budgetRows = backup.budget_settings.map((setting) => ({
+          family_group_id: familyGroup.id,
+          budget_key: setting.budget_key,
+          amount: setting.amount,
+          carryover_enabled: setting.carryover_enabled,
+          carryover_start_date: setting.carryover_start_date,
+        }));
+        const { error: budgetError } = await supabase
+          .from('budget_settings')
+          .upsert(budgetRows, { onConflict: 'family_group_id,budget_key' });
+        if (budgetError) throw budgetError;
       }
 
       await refresh();
@@ -848,6 +978,7 @@ export const useFamilyLedger = (user: User | null) => {
       paymentMethods,
       transactions,
       recurringTransactions,
+      budgetSettings,
       loading,
       error,
       isOnline,
@@ -861,6 +992,7 @@ export const useFamilyLedger = (user: User | null) => {
       saveRecurring,
       deleteRecurring,
       generateRecurringForMonth,
+      saveBudgetSettings,
       buildBackup,
       restoreBackup,
       resetData,
@@ -869,6 +1001,7 @@ export const useFamilyLedger = (user: User | null) => {
     }),
     [
       buildBackup,
+      budgetSettings,
       categories,
       claimFamilyMember,
       deleteRecurring,
@@ -888,6 +1021,7 @@ export const useFamilyLedger = (user: User | null) => {
       resetData,
       restoreBackup,
       saveRecurring,
+      saveBudgetSettings,
       saveTransaction,
       syncStatus,
       transactions,
