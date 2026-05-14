@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="민다니 패밀리 가계부">
+  <rect width="512" height="512" rx="112" fill="#0f2a44"/>
+  <circle cx="392" cy="126" r="62" fill="#f9735b"/>
+  <path d="M120 344c0-85 58-154 136-154s136 69 136 154v34c0 13-11 24-24 24H144c-13 0-24-11-24-24v-34Z" fill="#eaf4ff"/>
+  <path d="M156 330c0-63 43-114 100-114s100 51 100 114v18H156v-18Z" fill="#2563eb"/>
+  <path d="M180 178c0-42 34-76 76-76s76 34 76 76-34 76-76 76-76-34-76-76Z" fill="#f6b94b"/>
+  <path d="M188 366h136" stroke="#fff" stroke-width="26" stroke-linecap="round"/>
+  <path d="M214 318h84" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+  <path d="M232 150c12-14 36-14 48 0" stroke="#0f2a44" stroke-width="18" stroke-linecap="round"/>
+</svg>
